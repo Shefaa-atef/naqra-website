@@ -1,0 +1,18 @@
+/* A physical key, a brief confirmation, and type that arrives in a readable rhythm. */
+.shortcut-trigger,.shortcut-trigger:hover{transform:none;box-shadow:none;background:transparent;border-color:transparent;gap:15px}
+.shortcut-trigger kbd,.shortcut-trigger:hover kbd{width:60px;height:52px;border-radius:13px;background:linear-gradient(145deg,#e6edcf,#bbd1b2);color:#15383c;border:1px solid #f2f6dd99;box-shadow:0 5px 0 #071e26;font-size:20px;transform:none;transition:background .2s}
+.shortcut-trigger:hover kbd{background:#f0f4db}
+.shortcut-trigger>span:last-child{opacity:.5}
+.shortcut-toast{transition:opacity .3s,translate .3s;box-shadow:0 12px 35px #061c2833}
+.shortcut-toast.toast-resting{opacity:0;translate:0 -6px;pointer-events:none}
+.word-reveal .motion-word{display:inline-block;vertical-align:baseline}
+@media(prefers-reduced-motion:no-preference){
+.word-reveal .motion-word{opacity:0;transform:translateY(.65em);filter:blur(4px);transition:opacity .65s var(--word-delay),transform .8s cubic-bezier(.16,1,.3,1) var(--word-delay),filter .65s var(--word-delay)}
+.word-reveal.text-entered .motion-word{opacity:1;transform:translateY(0);filter:blur(0)}
+.section-intro .eyebrow,.answers-heading>span{animation:text-soft-arrive .9s both;animation-timeline:view();animation-range:entry 0% entry 95%}
+@keyframes text-soft-arrive{from{opacity:.2;translate:0 14px;letter-spacing:.18em}to{opacity:1;translate:0 0}}
+}
+@media(prefers-reduced-motion:reduce){.word-reveal .motion-word{opacity:1;transform:none;filter:none}.shortcut-toast{transition:none}}
+/* Each animated word owns its paint: transformed children cannot be clipped by the heading's text background. */
+.hero h1.word-reveal{background:none;-webkit-text-fill-color:initial;color:#e5efda;animation:none;min-width:0}
+.hero h1.word-reveal .motion-word{background:linear-gradient(125deg,#f7f8e8,#d8efdd 45%,#83d5b6);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;max-width:100%;overflow-wrap:anywhere}

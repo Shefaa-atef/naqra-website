@@ -1,0 +1,13 @@
+/* Let the strand be the object, with open space inside rather than nested discs. */
+.hero .bead-orbit{width:86%;height:86%;left:7%;top:3%}
+.hero .bead{width:22px;height:22px}
+.hero .tassel{top:87.5%;width:92px;height:84px}
+.hero .count-glass{background:transparent;border:0;box-shadow:none;backdrop-filter:none;width:66%;height:66%;left:17%;top:13%}
+.hero .count-glass:before{display:none}
+.hero .orbit-ring{display:none}
+.hero .count-number{font-size:clamp(90px,8vw,118px)}
+.hero .demo-phrase{font-size:clamp(30px,3vw,40px)}
+.hero .hero-object{background:radial-gradient(ellipse at 50% 45%,#91bc9720,transparent 65%)}
+.masbaha-cord path{stroke:#b7c8a9;stroke-width:2.1;vector-effect:non-scaling-stroke;stroke-opacity:.72;stroke-linejoin:round}
+@media(max-width:800px){.hero .bead{width:19px;height:19px}.hero .tassel{width:80px;height:73px}}
+@media(max-width:480px){.hero .bead{width:15px;height:15px}.hero .tassel{width:65px;height:59px}.hero .count-number{font-size:78px}.hero .demo-phrase{font-size:27px}.masbaha-cord path{stroke-width:1.7}}
