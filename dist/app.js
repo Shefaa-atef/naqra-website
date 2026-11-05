@@ -90,6 +90,13 @@ motion.addEventListener('change',()=>{if(motion.matches){document.querySelectorA
 // Interactive website previews use local sample state only.
 let shortcutDemoCount=13,shortcutExpiry;
 const shortcutToast=document.querySelector('#shortcut-toast'),shortcutTrigger=document.querySelector('#shortcut-trigger');
+shortcutTrigger.setAttribute('aria-keyshortcuts','F8');
+document.addEventListener('keydown',e=>{
+  if(e.key!=='F8'||e.ctrlKey||e.altKey||e.shiftKey||e.metaKey||e.isComposing||e.defaultPrevented)return;
+  if(e.target instanceof Element&&e.target.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]'))return;
+  e.preventDefault();
+  if(!e.repeat)shortcutTrigger.click();
+});
 shortcutTrigger.addEventListener('click',()=>{
   clearTimeout(shortcutExpiry);
   shortcutDemoCount++;
