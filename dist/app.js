@@ -19,7 +19,7 @@ Object.assign(iconPaths,{
   volume:'<path d="m11 5-6 4H2v6h3l6 4zM16 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
   close:'<path d="m6 6 12 12M18 6 6 18"/>',
   menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
-  message:'<path d="M21 11a8 8 0 0 1-8 8H5l-3 3V11a9 9 0 0 1 18 0Z"/><path d="M7 10h8m-8 4h5"/>',
+  message:'<path d="M5 3h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8l-5 3V5a2 2 0 0 1 2-2Z"/><path d="M7 8h10M7 12h7"/>',
   layers:'<path d="m12 3 10 6-10 6L2 9zM2 13l10 6 10-6M2 17l10 6 10-6"/>',
   sliders:'<path d="M4 6h7m4 0h5M4 12h2m4 0h10M4 18h10m4 0h2"/><circle cx="13" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="18" r="2"/>',
   check:'<path d="m5 12 4 4L19 6"/>',
@@ -55,7 +55,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.classList.cont
 const navLinks=menu.querySelectorAll('.menu-links a');
 // One observer tracks all real destinations.
 const destinationObserver=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(visible)navLinks.forEach(a=>{if(a.hash===`#${visible.target.id}`)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});},{rootMargin:'-15% 0px -35% 0px',threshold:[0,.1,.35]});
-['experience','questions','download'].forEach(id=>destinationObserver.observe(document.getElementById(id)));
+navLinks.forEach(link=>destinationObserver.observe(document.getElementById(link.hash.slice(1))));
 document.querySelector('#language').addEventListener('click',closeMenu);
 document.querySelector('#year').textContent=String(new Date().getFullYear());
 const loadingStarted=performance.now();const loaded=new Promise(resolve=>{if(document.readyState==='complete')resolve();else addEventListener('load',resolve,{once:true});});
