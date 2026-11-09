@@ -3,12 +3,29 @@ const labels=['Subhan Allah','Alhamdulillah','Allahu Akbar'];
 const counts=[0,0,0];let active=0,arabic=false;
 const orbit=document.querySelector('#beads');
 for(let i=0;i<33;i++){const bead=document.createElement('span');bead.className='bead';const angle=Math.PI/2+.16+(i/32)*(Math.PI*2-.32);bead.style.setProperty('--x',`${Math.cos(angle)*50}%`);bead.style.setProperty('--y',`${Math.sin(angle)*50}%`);orbit.append(bead);}
-function render(){const n=counts[active];document.querySelector('#number').textContent=String(n);document.querySelector('#phrase').textContent=phrases[active];document.querySelector('#count').setAttribute('aria-label',`${arabic?'عدّ':'Count'} ${labels[active]}: ${n}`);document.querySelectorAll('.bead').forEach((b,i)=>b.classList.toggle('filled',i<(n===0?0:(n-1)%33+1)));document.querySelector('#count-caption').textContent=arabic?'نقرةٌ، وذكرٌ':'a moment, a remembrance';document.querySelectorAll('[data-phrase]').forEach((b,i)=>{b.classList.toggle('selected',i===active);b.setAttribute('aria-pressed',String(i===active));});}
+function render(){const n=counts[active];document.querySelector('#number').textContent=String(n);document.querySelector('#phrase').textContent=phrases[active];document.querySelector('#count').setAttribute('aria-label',`${arabic?'عدّ':'Count'} ${labels[active]}: ${n}`);document.querySelectorAll('.bead').forEach((b,i)=>b.classList.toggle('filled',i<(n===0?0:(n-1)%33+1)));document.querySelectorAll('[data-phrase]').forEach((b,i)=>{b.classList.toggle('selected',i===active);b.setAttribute('aria-pressed',String(i===active));});}
 function countOnce(manual=false){counts[active]++;render();const object=document.querySelector('.hero-object');object.classList.remove('is-clicking');void object.offsetWidth;object.classList.add('is-clicking');if(!motion.matches)playfulCount();if(manual)document.querySelector('#demo-status').textContent=`${phrases[active]} ${counts[active]}`;}
 document.querySelector('#count').addEventListener('click',()=>{lastInteraction=Date.now();countOnce(true);});
 document.querySelectorAll('[data-phrase]').forEach(b=>b.addEventListener('click',()=>{active=Number(b.dataset.phrase);render();}));
 document.querySelector('#language').addEventListener('click',()=>{arabic=!arabic;document.documentElement.lang=arabic?'ar':'en';document.documentElement.dir=arabic?'rtl':'ltr';document.querySelectorAll('[data-en]').forEach(el=>{el.innerHTML=el.dataset[arabic?'ar':'en'];});const button=document.querySelector('#language');button.textContent=arabic?'English':'العربية';button.setAttribute('aria-label',arabic?'Switch to English':'Switch to Arabic');render();});
-let remaining=24*60+38;setInterval(()=>{remaining=remaining>0?remaining-1:24*60+38;document.querySelector('#prayer-time').textContent=`00:${String(Math.floor(remaining/60)).padStart(2,'0')}:${String(remaining%60).padStart(2,'0')}`;},1000);
+// Fast illustrative loop: yellow, orange, red, then green at prayer time.
+const prayerScene=document.querySelector('.prayer-story'),prayerClock=document.querySelector('#prayer-time');
+const countdownSeconds=30,greenHoldSeconds=4,prayerLoopSeconds=countdownSeconds+greenHoldSeconds;
+let demoElapsed=0,demoLast=performance.now(),lastPrayerSecond=-1,lastPrayerClockUpdate=-Infinity;
+function prayerPreviewFrame(now){
+ if(!document.hidden)demoElapsed=(demoElapsed+(now-demoLast)/1000)%prayerLoopSeconds;
+ demoLast=now;
+ const arrived=demoElapsed>=countdownSeconds,remaining=arrived?0:3600*(1-demoElapsed/countdownSeconds),seconds=Math.ceil(remaining);
+ prayerScene.dataset.proximity=arrived?'later':remaining<=600?'near':remaining<=1800?'soon':'hour';
+ const progress=1-remaining/3600;
+ prayerScene.style.setProperty('--sun-y',(25+progress*260)+'px');
+ prayerScene.style.setProperty('--sun-x',(-45+progress*90)+'px');
+ prayerScene.style.setProperty('--sun-opacity',String(Math.min(1,remaining/120)));
+ if(seconds!==lastPrayerSecond&&(now-lastPrayerClockUpdate>=700||seconds===0||lastPrayerSecond===0)){lastPrayerClockUpdate=now;lastPrayerSecond=seconds;prayerClock.textContent=[Math.floor(seconds/3600),Math.floor(seconds/60)%60,seconds%60].map(n=>String(n).padStart(2,'0')).join(':');}
+ requestAnimationFrame(prayerPreviewFrame);
+}
+requestAnimationFrame(prayerPreviewFrame);
+
 render();
 
 // Local SVG icons share one deliberate stroke system; no remote font or emoji.
@@ -29,9 +46,9 @@ function paintIcons(root=document){root.querySelectorAll('[data-icon]').forEach(
 paintIcons();
 const motion=matchMedia('(prefers-reduced-motion: reduce)');
 let playing=!motion.matches,lastInteraction=0;
-const demoButton=document.querySelector('#demo-play');
-function updatePlay(){demoButton.setAttribute('aria-pressed',String(playing));demoButton.querySelector('[data-icon]').dataset.icon=playing?'pause':'play';document.querySelector('#demo-play-label').textContent=arabic?(playing?'إيقاف العرض':'تشغيل العرض'):(playing?'Pause demo':'Play demo');paintIcons(demoButton);document.querySelector('.hero-object').classList.toggle('demo-paused',!playing);if(!playing)document.querySelector('.hero-object').classList.remove('pointer-approach');}
-demoButton.addEventListener('click',()=>{playing=!playing;updatePlay();});
+
+function updatePlay(){document.querySelector('.hero-object').classList.toggle('demo-paused',!playing);if(!playing)document.querySelector('.hero-object').classList.remove('pointer-approach');}
+
 document.querySelector('#language').addEventListener('click',()=>{paintIcons();updatePlay();});
 motion.addEventListener('change',()=>{playing=!motion.matches;updatePlay();});
 const heroObject=document.querySelector('.hero-object');let demoVisible=true;
@@ -53,9 +70,11 @@ menu.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
 document.addEventListener('click',e=>{if(!e.composedPath().includes(menu))closeMenu();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.classList.contains('menu-open')){closeMenu();menuToggle.focus();}});
 const navLinks=menu.querySelectorAll('.menu-links a');
-// One observer tracks all real destinations.
-const destinationObserver=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(visible)navLinks.forEach(a=>{if(a.hash===`#${visible.target.id}`)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});},{rootMargin:'-15% 0px -35% 0px',threshold:[0,.1,.35]});
-navLinks.forEach(link=>destinationObserver.observe(document.getElementById(link.hash.slice(1))));
+// Select one destination in document order, using layout coordinates, not reveal transforms.
+function sectionTop(element){let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top;}
+const navSections=[...navLinks].map(link=>({link,section:document.querySelector(link.hash)})).filter(item=>item.section);
+function updateNavLocation(){let current=navSections[0];for(const item of navSections){if(sectionTop(item.section)<=scrollY+145)current=item;}if(innerHeight+scrollY>=document.documentElement.scrollHeight-8)current=navSections.at(-1);navSections.forEach(item=>{if(scrollY>100&&item===current)item.link.setAttribute('aria-current','location');else item.link.removeAttribute('aria-current');});}
+addEventListener('scroll',updateNavLocation,{passive:true});updateNavLocation();
 document.querySelector('#language').addEventListener('click',closeMenu);
 document.querySelector('#year').textContent=String(new Date().getFullYear());
 const loadingStarted=performance.now();const loaded=new Promise(resolve=>{if(document.readyState==='complete')resolve();else addEventListener('load',resolve,{once:true});});
@@ -111,12 +130,12 @@ shortcutTrigger.addEventListener('click',()=>{
 });
 let prayerDemoMuted=true,verseBookmarked=false;
 const prayerMute=document.querySelector('#prayer-demo-mute'),bookmark=document.querySelector('#verse-bookmark');
-function renderWidgetLabels(){const status=document.querySelector('#prayer-demo-status');const label=prayerDemoMuted?(arabic?'تذكير صامت':'Silent reminder'):(arabic?'معاينة إعداد الصوت':'Sound setting preview');status.textContent=label;status.dataset.en=prayerDemoMuted?'Silent reminder':'Sound setting preview';status.dataset.ar=prayerDemoMuted?'تذكير صامت':'معاينة إعداد الصوت';prayerMute.setAttribute('aria-label',arabic?'كتم الصوت في المعاينة':'Mute sound setting in preview');bookmark.setAttribute('aria-label',arabic?(verseBookmarked?'إلغاء الحفظ في المثال':'حفظ الآية في المثال'):(verseBookmarked?'Remove demo bookmark':'Bookmark this verse in the demo'));document.querySelector('#verse-saved').textContent=verseBookmarked?(arabic?'محفوظة في المثال':'Saved in demo'):'';}
+function renderWidgetLabels(){const status=document.querySelector('#prayer-demo-status');const label=prayerDemoMuted?(arabic?'تذكير صامت':'Silent reminder'):(arabic?'معاينة إعداد الصوت':'Sound setting preview');status.textContent=label;status.dataset.en=prayerDemoMuted?'Silent reminder':'Sound setting preview';status.dataset.ar=prayerDemoMuted?'تذكير صامت':'معاينة إعداد الصوت';prayerMute.setAttribute('aria-label',arabic?'كتم الصوت في المعاينة':'Mute sound setting in preview');bookmark.setAttribute('aria-label',arabic?(verseBookmarked?'إلغاء الحفظ في المثال':'حفظ النص في المثال'):(verseBookmarked?'Remove demo bookmark':'Bookmark this reminder in the demo'));document.querySelector('#verse-saved').textContent=verseBookmarked?(arabic?'محفوظة في المثال':'Saved in demo'):'';}
 prayerMute.addEventListener('click',()=>{prayerDemoMuted=!prayerDemoMuted;prayerMute.setAttribute('aria-pressed',String(prayerDemoMuted));prayerMute.querySelector('[data-icon]').dataset.icon=prayerDemoMuted?'volume-off':'volume';paintIcons(prayerMute);renderWidgetLabels();});
 bookmark.addEventListener('click',()=>{verseBookmarked=!verseBookmarked;bookmark.setAttribute('aria-pressed',String(verseBookmarked));bookmark.querySelector('[data-icon]').dataset.icon=verseBookmarked?'bookmark-filled':'bookmark';paintIcons(bookmark);document.querySelector('.verse-card').classList.toggle('is-bookmarked',verseBookmarked);if(!motion.matches)spring(bookmark,[{transform:'scale(1)'},{transform:'scale(1.22) rotate(-8deg)',offset:.4},{transform:'scale(1) rotate(0deg)'}],{duration:400});renderWidgetLabels();});
 const weekSamples=[12,23,18,34,27,42,33],weekNames=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],weekArabic=['الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت','الأحد'];let selectedSample=6;
 const weekChart=document.querySelector('#week-chart');weekSamples.forEach((value,i)=>{const button=document.createElement('button');button.className='week-bar';button.style.setProperty('--bar-height',`${value/50*100}%`);button.innerHTML=`<span class="week-bar-track"><i></i></span><span class="week-bar-label"></span>`;button.addEventListener('click',()=>{selectedSample=i;renderWeek();if(!motion.matches)spring(document.querySelector('#week-count'),[{opacity:.3,transform:'translateY(9px)'},{opacity:1,transform:'translateY(0)'}],{duration:300,easing:'ease-out'});});weekChart.append(button);});
-function renderWeek(){beadSprings.get(document.querySelector('#week-ring-value'))?.cancel();const value=weekSamples[selectedSample],percent=Math.round(value/50*100);document.querySelector('#week-count').textContent=String(value);document.querySelector('#week-day').textContent=(arabic?weekArabic:weekNames)[selectedSample];document.querySelector('#week-percent').textContent=percent+'%';document.querySelector('#week-ring-value').style.strokeDashoffset=String(251.33*(1-value/50));document.querySelector('#week-total').textContent=String(weekSamples.reduce((a,b)=>a+b,0));weekChart.querySelectorAll('button').forEach((button,i)=>{button.setAttribute('aria-pressed',String(i===selectedSample));button.setAttribute('aria-label',`${(arabic?weekArabic:weekNames)[i]}: ${weekSamples[i]}`);button.querySelector('.week-bar-label').textContent=arabic?['ن','ث','ر','خ','ج','س','ح'][i]:['M','T','W','T','F','S','S'][i];});}
+function renderWeek(){beadSprings.get(document.querySelector('#week-ring-value'))?.cancel();const value=weekSamples[selectedSample],percent=Math.round(value/50*100);document.querySelector('#week-count').textContent=String(value);document.querySelector('#week-day').textContent=(arabic?weekArabic:weekNames)[selectedSample];document.querySelector('#week-percent').textContent=percent+'%';document.querySelector('#week-ring-value').style.strokeDashoffset=String(251.33*(1-value/50));weekChart.querySelectorAll('button').forEach((button,i)=>{button.setAttribute('aria-pressed',String(i===selectedSample));button.setAttribute('aria-label',`${(arabic?weekArabic:weekNames)[i]}: ${weekSamples[i]}`);button.querySelector('.week-bar-label').textContent=arabic?['ن','ث','ر','خ','ج','س','ح'][i]:['M','T','W','T','F','S','S'][i];});}
 renderWeek();renderWidgetLabels();document.querySelector('#language').addEventListener('click',()=>{renderWeek();renderWidgetLabels();});
 
 const beadCord=document.createElementNS('http://www.w3.org/2000/svg','svg');beadCord.setAttribute('viewBox','0 0 100 100');beadCord.setAttribute('class','masbaha-cord');beadCord.setAttribute('aria-hidden','true');
@@ -126,19 +145,19 @@ document.querySelectorAll('.answers-list details').forEach(detail=>detail.addEve
 document.querySelectorAll('.answers-list summary,.salah-mute,.verse-bookmark,.get-button,.menu-toggle').forEach(control=>control.addEventListener('pointerdown',event=>{if(motion.matches)return;const bounds=control.getBoundingClientRect(),ripple=document.createElement('span'),size=Math.max(bounds.width,bounds.height)*2;ripple.className='control-ripple';ripple.setAttribute('aria-hidden','true');ripple.style.cssText=`width:${size}px;height:${size}px;left:${event.clientX-bounds.left}px;top:${event.clientY-bounds.top}px`;control.append(ripple);const animation=ripple.animate([{scale:0,opacity:.8},{scale:1,opacity:0}],{duration:650,easing:'ease-out'});animation.onfinish=()=>ripple.remove();}));
 let clockVisible=false;
 const clockVisibility=new IntersectionObserver(entries=>{clockVisible=entries[0].isIntersecting;},{threshold:.1});clockVisibility.observe(document.querySelector('.salah-clock'));
-new MutationObserver(()=>{if(motion.matches||!clockVisible||document.hidden)return;spring(document.querySelector('#prayer-time'),[{opacity:.65,transform:'translateY(3px)'},{opacity:1,transform:'translateY(0)'}],{duration:260,easing:'ease-out'});}).observe(document.querySelector('#prayer-time'),{childList:true});
+
 const ringEntrance=new IntersectionObserver(entries=>{if(!entries[0].isIntersecting)return;if(!motion.matches){const ring=document.querySelector('#week-ring-value');spring(ring,[{strokeDashoffset:'251.33'},{strokeDashoffset:ring.style.strokeDashoffset}],{duration:1100,easing:'cubic-bezier(.2,.8,.2,1)'});}ringEntrance.disconnect();},{threshold:.35});ringEntrance.observe(document.querySelector('.week-widget'));
 motion.addEventListener('change',()=>{if(!motion.matches)return;document.querySelectorAll('.answer-dot,.answer-body,#prayer-time,#week-ring-value').forEach(el=>beadSprings.get(el)?.cancel());document.querySelectorAll('.control-ripple').forEach(el=>el.remove());});
 // The chart pointer demonstrates the same selectable days as a real tap.
-const weekWidget=document.querySelector('.week-widget'),weekPlay=document.querySelector('#week-demo-play');
+const weekWidget=document.querySelector('.week-widget');
 const weekPointer=document.createElement('span');weekPointer.className='week-demo-pointer';weekPointer.setAttribute('aria-hidden','true');weekPointer.innerHTML='<svg viewBox="0 0 32 40" fill="none"><path d="M4 3L27 23L17 24L12 35L4 3Z" fill="#fff7df" stroke="#123e42" stroke-width="2" stroke-linejoin="round"/></svg>';weekChart.append(weekPointer);
 let weekPlaying=!motion.matches,weekVisible=false,weekTimer,weekTouchTimer,weekRevision=0;
 function stopWeekStep(){clearTimeout(weekTimer);clearTimeout(weekTouchTimer);weekRevision++;}
-function renderWeekPlay(){weekPlay.disabled=motion.matches;weekPlay.setAttribute('aria-pressed',String(weekPlaying));weekPlay.querySelector('[data-icon]').dataset.icon=weekPlaying?'pause':'play';document.querySelector('#week-demo-play-label').textContent=motion.matches?(arabic?'حركة مخففة':'Reduced motion'):(arabic?(weekPlaying?'إيقاف العرض':'تشغيل العرض'):(weekPlaying?'Pause demo':'Play demo'));paintIcons(weekPlay);weekWidget.classList.toggle('week-demo-running',weekPlaying&&weekVisible&&!motion.matches);}
+function renderWeekPlay(){weekWidget.classList.toggle('week-demo-running',weekPlaying&&weekVisible&&!motion.matches);}
 function scheduleWeekStep(delay=2200){stopWeekStep();if(!weekPlaying||!weekVisible||motion.matches||document.hidden)return;const revision=weekRevision;weekTimer=setTimeout(()=>{if(revision!==weekRevision)return;const next=(selectedSample+1)%weekSamples.length,bar=weekChart.querySelectorAll('.week-bar')[next],fill=bar.querySelector('i').getBoundingClientRect(),chart=weekChart.getBoundingClientRect();weekWidget.classList.remove('week-demo-resting');weekPointer.style.left=`${(fill.left+fill.width/2-chart.left-3)/chart.width*100}%`;weekPointer.style.top=`${(fill.top+Math.min(12,fill.height/3)-chart.top-2)/chart.height*100}%`;weekTouchTimer=setTimeout(()=>{if(revision!==weekRevision||!weekPlaying||!weekVisible||motion.matches||document.hidden)return;weekPointer.classList.remove('is-touching');void weekPointer.offsetWidth;weekPointer.classList.add('is-touching');spring(weekPointer.querySelector('svg'),[{transform:'scale(1)'},{transform:'scale(.78)',offset:.35},{transform:'scale(1)'}],{duration:350,easing:'ease-out'});bar.click();scheduleWeekStep(2500);},700);},delay);}
 function pauseForWeekInput(){stopWeekStep();weekWidget.classList.add('week-demo-resting');if(weekPlaying&&weekVisible&&!motion.matches)scheduleWeekStep(6000);}
 weekChart.addEventListener('pointerdown',pauseForWeekInput);weekChart.addEventListener('keydown',pauseForWeekInput);
-weekPlay.addEventListener('click',()=>{weekPlaying=!weekPlaying;renderWeekPlay();if(weekPlaying)scheduleWeekStep(300);else{stopWeekStep();weekWidget.classList.add('week-demo-resting');}});
+
 new IntersectionObserver(entries=>{weekVisible=entries[0].isIntersecting;renderWeekPlay();if(weekVisible)scheduleWeekStep(1100);else stopWeekStep();},{threshold:.4}).observe(weekWidget);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopWeekStep();else scheduleWeekStep(1100);});
 motion.addEventListener('change',()=>{weekPlaying=!motion.matches;renderWeekPlay();if(weekPlaying)scheduleWeekStep(1100);else stopWeekStep();});
@@ -180,3 +199,47 @@ function connectMasbaha(){
 }
 new ResizeObserver(connectMasbaha).observe(heroObject);
 connectMasbaha();
+
+
+// Reveal the navigation when the reader reverses direction.
+let navLastY=scrollY,navTravel=0,navDirection=0;
+addEventListener('scroll',()=>{const y=Math.max(0,scrollY),delta=y-navLastY,direction=Math.sign(delta);if(direction!==navDirection)navTravel=0;navTravel+=Math.abs(delta);navDirection=direction;navLastY=y;const nav=document.querySelector('#site-menu');if(y<90||nav.classList.contains('menu-open'))nav.classList.remove('nav-hidden');else if(navTravel>9)nav.classList.toggle('nav-hidden',direction>0);},{passive:true});
+document.querySelector('#site-menu').addEventListener('focusin',()=>document.querySelector('#site-menu').classList.remove('nav-hidden'));
+// Content and attributions come from the bundled desktop library.
+const reminderItems=[{"category":"quran","arabic":"أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ","reference_ar":"الرعد ١٣:٢٨ · جزء من الآية","reference_en":"Ar-Ra’d 13:28 · Excerpt"},{"arabic":"بِاسْمِكَ أَمُوتُ وَأَحْيَا","category":"dua","authenticity":"Sahih · Sahih al-Bukhari","id":"dua-sleep","english":"Before sleeping · prophetic supplication","url":"https://sunnah.com/bukhari:6312","license":"Classical Arabic text, public domain; no modern translation reproduced","reference":"Sahih al-Bukhari 6312 · excerpt","reference_ar":"صحيح البخاري 6312 · صحيح","reference_en":"Sahih al-Bukhari 6312 · Sahih"},{"arabic":"إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى","category":"hadith","authenticity":"Sahih · Sahih al-Bukhari","id":"hadith-intentions","english":"On intentions · excerpt, not the complete narration","url":"https://sunnah.com/bukhari:1","license":"Classical Arabic text, public domain; no modern translation reproduced","reference":"Sahih al-Bukhari 1 · excerpt","reference_ar":"صحيح البخاري 1 · صحيح","reference_en":"Sahih al-Bukhari 1 · Sahih"}];
+let reminderIndex=0,reminderVisible=false,reminderTransition=0;
+const reminderAnimations=new Set();
+const reminderCard=document.querySelector('.verse-card');
+function renderReminder(){const item=reminderItems[reminderIndex],category=document.querySelector('#reminder-category'),reference=document.querySelector('#reminder-reference');const names={quran:['Quran','القرآن الكريم'],dua:['Du’a','دعاء'],hadith:['Hadith','حديث']};category.dataset.en=names[item.category][0];category.dataset.ar=names[item.category][1];category.textContent=names[item.category][arabic?1:0];reminderCard.querySelector('blockquote').textContent=item.arabic;reference.dataset.en=item.reference_en;reference.dataset.ar=item.reference_ar;reference.textContent=arabic?item.reference_ar:item.reference_en;reminderCard.dataset.category=item.category;}
+function animateReminder(element,frames,options){const animation=element.animate(frames,options);reminderAnimations.add(animation);animation.finished.catch(()=>{}).finally(()=>reminderAnimations.delete(animation));return animation;}
+async function changeReminder(){
+ const revision=++reminderTransition;
+ const text=reminderCard.querySelector('blockquote'),category=document.querySelector('#reminder-category'),reference=document.querySelector('#reminder-reference');
+ const nodes=[text,category,reference];
+ if(!motion.matches){
+  const exits=nodes.map((node,i)=>animateReminder(node,[{opacity:1,transform:'translateY(0)',filter:'blur(0px)'},{opacity:0,transform:'translateY(-8px)',filter:'blur(2px)'}],{duration:130,delay:i*15,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'}));
+  await Promise.all(exits.map(a=>a.finished.catch(()=>{})));
+  if(revision!==reminderTransition)return;
+ }
+ reminderIndex=(reminderIndex+1)%reminderItems.length;
+ verseBookmarked=false;bookmark.setAttribute('aria-pressed','false');bookmark.querySelector('[data-icon]').dataset.icon='bookmark';reminderCard.classList.remove('is-bookmarked');paintIcons(bookmark);renderWidgetLabels();renderReminder();
+ nodes.forEach(node=>node.getAnimations().forEach(animation=>animation.cancel()));
+ if(!motion.matches){
+  nodes.forEach((node,i)=>animateReminder(node,[{opacity:0,transform:'translateY(14px)',filter:'blur(3px)'},{opacity:1,transform:'translateY(0)',filter:'blur(0px)'}],{duration:360,delay:i*45,easing:'cubic-bezier(.16,1,.3,1)',fill:'backwards'}));
+ }
+}
+function settleReminder(){reminderTransition++;reminderAnimations.forEach(animation=>animation.cancel());reminderAnimations.clear();reminderCard.querySelectorAll('blockquote,#reminder-category,#reminder-reference').forEach(node=>node.getAnimations().forEach(animation=>animation.cancel()));renderReminder();}
+new IntersectionObserver(entries=>{reminderVisible=entries[0].isIntersecting;},{threshold:.2}).observe(reminderCard);
+setInterval(()=>{if(document.hidden||!reminderVisible||reminderCard.contains(document.activeElement))return;changeReminder();},4500);
+document.querySelector('#language').addEventListener('click',settleReminder);motion.addEventListener('change',()=>{if(motion.matches)settleReminder();});renderReminder();
+
+
+
+// A short easing tail for mouse wheels; touch, keyboard and reduced motion stay native.
+let wheelTarget=scrollY,wheelFrame=0,wheelPrevious=0;
+function stopWheel(){if(wheelFrame)cancelAnimationFrame(wheelFrame);wheelFrame=0;wheelPrevious=0;wheelTarget=scrollY;}
+function easeWheel(now){const dt=wheelPrevious?Math.min(40,now-wheelPrevious):16;wheelPrevious=now;const current=scrollY,next=current+(wheelTarget-current)*(1-Math.exp(-dt/85));window.scrollTo({top:next,behavior:'instant'});if(Math.abs(wheelTarget-next)>.5)wheelFrame=requestAnimationFrame(easeWheel);else{window.scrollTo({top:wheelTarget,behavior:'instant'});wheelFrame=0;wheelPrevious=0;}}
+addEventListener('wheel',event=>{if(motion.matches||event.ctrlKey||Math.abs(event.deltaX)>Math.abs(event.deltaY)||event.target.closest('.menu-links,textarea,input,select,[contenteditable=true]'))return;if(!event.deltaY)return;event.preventDefault();const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?innerHeight:1);wheelTarget=Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,(wheelFrame?wheelTarget:scrollY)+delta));if(!wheelFrame)wheelFrame=requestAnimationFrame(easeWheel);},{passive:false});
+addEventListener('touchstart',stopWheel,{passive:true});addEventListener('pointerdown',stopWheel,{passive:true});addEventListener('keydown',event=>{if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(event.key))stopWheel();});motion.addEventListener('change',()=>{if(motion.matches)stopWheel();});
+// One click, one scroll. Updating the URL must not also trigger native anchor scrolling.
+document.addEventListener('click',event=>{const link=event.target.closest('a[href^="#"]');if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;const destination=document.getElementById(link.hash.slice(1));if(!destination)return;event.preventDefault();stopWheel();closeMenu();history.replaceState(null,'',link.hash);requestAnimationFrame(()=>{wheelTarget=Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,sectionTop(destination)-105));if(motion.matches)window.scrollTo({top:wheelTarget,behavior:'instant'});else{wheelPrevious=0;wheelFrame=requestAnimationFrame(easeWheel);}});});
