@@ -3,25 +3,33 @@ const labels=['Subhan Allah','Alhamdulillah','Allahu Akbar'];
 const counts=[0,0,0];let active=0,arabic=false;
 const orbit=document.querySelector('#beads');
 for(let i=0;i<33;i++){const bead=document.createElement('span');bead.className='bead';const angle=Math.PI/2+.16+(i/32)*(Math.PI*2-.32);bead.style.setProperty('--x',`${Math.cos(angle)*50}%`);bead.style.setProperty('--y',`${Math.sin(angle)*50}%`);orbit.append(bead);}
-function render(){const n=counts[active];document.querySelector('#number').textContent=String(n);document.querySelector('#phrase').textContent=phrases[active];document.querySelector('#count').setAttribute('aria-label',`${arabic?'عدّ':'Count'} ${labels[active]}: ${n}`);document.querySelectorAll('.bead').forEach((b,i)=>b.classList.toggle('filled',i<(n===0?0:(n-1)%33+1)));document.querySelectorAll('[data-phrase]').forEach((b,i)=>{b.classList.toggle('selected',i===active);b.setAttribute('aria-pressed',String(i===active));});}
+function render(){const n=counts[active];document.querySelector('#number').textContent=String(n);document.querySelector('#phrase').textContent=phrases[active];document.querySelector('#count').setAttribute('aria-label',`${arabic?'عدّ':'Count'} ${arabic?['سبحان الله','الحمد لله','الله أكبر'][active]:labels[active]}: ${n}`);document.querySelectorAll('.bead').forEach((b,i)=>b.classList.toggle('filled',i<(n===0?0:(n-1)%33+1)));document.querySelectorAll('[data-phrase]').forEach((b,i)=>{b.classList.toggle('selected',i===active);b.setAttribute('aria-pressed',String(i===active));});}
 function countOnce(manual=false){counts[active]++;render();const object=document.querySelector('.hero-object');object.classList.remove('is-clicking');void object.offsetWidth;object.classList.add('is-clicking');if(!motion.matches)playfulCount();if(manual)document.querySelector('#demo-status').textContent=`${phrases[active]} ${counts[active]}`;}
 document.querySelector('#count').addEventListener('click',()=>{lastInteraction=Date.now();countOnce(true);});
 document.querySelectorAll('[data-phrase]').forEach(b=>b.addEventListener('click',()=>{active=Number(b.dataset.phrase);render();}));
 document.querySelector('#language').addEventListener('click',()=>{arabic=!arabic;document.documentElement.lang=arabic?'ar':'en';document.documentElement.dir=arabic?'rtl':'ltr';document.querySelectorAll('[data-en]').forEach(el=>{el.innerHTML=el.dataset[arabic?'ar':'en'];});const button=document.querySelector('#language');button.textContent=arabic?'English':'العربية';button.setAttribute('aria-label',arabic?'Switch to English':'Switch to Arabic');render();});
 // Fast illustrative loop: yellow, orange, red, then green at prayer time.
 const prayerScene=document.querySelector('.prayer-story'),prayerClock=document.querySelector('#prayer-time');
+const prayerStar=prayerScene.querySelector('.prayer-proximity-star');
+function updatePrayerStarSky(){const hour=new Date().getHours();prayerStar.dataset.sky=hour<6||hour>=19?'night':'day';}
+updatePrayerStarSky();setInterval(updatePrayerStarSky,60000);
 const countdownSeconds=30,greenHoldSeconds=4,prayerLoopSeconds=countdownSeconds+greenHoldSeconds;
+let prayerPreviewVisible=false;
+new IntersectionObserver(entries=>{prayerPreviewVisible=entries[0].isIntersecting;},{threshold:.05}).observe(prayerScene);
 let demoElapsed=0,demoLast=performance.now(),lastPrayerSecond=-1,lastPrayerClockUpdate=-Infinity;
 function prayerPreviewFrame(now){
- if(!document.hidden)demoElapsed=(demoElapsed+(now-demoLast)/1000)%prayerLoopSeconds;
+ if(!document.hidden&&prayerPreviewVisible)demoElapsed=(demoElapsed+Math.min(100,now-demoLast)/1000)%prayerLoopSeconds;
  demoLast=now;
+ if(document.hidden||!prayerPreviewVisible){requestAnimationFrame(prayerPreviewFrame);return;}
  const arrived=demoElapsed>=countdownSeconds,remaining=arrived?0:3600*(1-demoElapsed/countdownSeconds),seconds=Math.ceil(remaining);
- prayerScene.dataset.proximity=arrived?'later':remaining<=600?'near':remaining<=1800?'soon':'hour';
+ const proximity=arrived?'later':remaining<=600?'near':remaining<=1800?'soon':'hour';
+ const phaseChanged=prayerScene.dataset.proximity!==proximity;
+ prayerScene.dataset.proximity=proximity;
  const progress=1-remaining/3600;
  prayerScene.style.setProperty('--sun-y',(25+progress*260)+'px');
  prayerScene.style.setProperty('--sun-x',(-45+progress*90)+'px');
  prayerScene.style.setProperty('--sun-opacity',String(Math.min(1,remaining/120)));
- if(seconds!==lastPrayerSecond&&(now-lastPrayerClockUpdate>=700||seconds===0||lastPrayerSecond===0)){lastPrayerClockUpdate=now;lastPrayerSecond=seconds;prayerClock.textContent=[Math.floor(seconds/3600),Math.floor(seconds/60)%60,seconds%60].map(n=>String(n).padStart(2,'0')).join(':');}
+ if(seconds!==lastPrayerSecond&&(now-lastPrayerClockUpdate>=700||seconds===0||lastPrayerSecond===0||phaseChanged)){lastPrayerClockUpdate=now;lastPrayerSecond=seconds;prayerClock.textContent=[Math.floor(seconds/3600),Math.floor(seconds/60)%60,seconds%60].map(n=>String(n).padStart(2,'0')).join(':');}
  requestAnimationFrame(prayerPreviewFrame);
 }
 requestAnimationFrame(prayerPreviewFrame);
@@ -51,7 +59,7 @@ function updatePlay(){document.querySelector('.hero-object').classList.toggle('d
 
 document.querySelector('#language').addEventListener('click',()=>{paintIcons();updatePlay();});
 motion.addEventListener('change',()=>{playing=!motion.matches;updatePlay();});
-const heroObject=document.querySelector('.hero-object');let demoVisible=true;
+const heroObject=document.querySelector('.hero-object');heroObject.setAttribute('aria-label','Interactive dhikr demonstration');document.querySelector('#language').addEventListener('click',()=>heroObject.setAttribute('aria-label',arabic?'تجربة عدّ الذكر':'Interactive dhikr demonstration'));let demoVisible=true;
 new IntersectionObserver(entries=>{demoVisible=entries[0].isIntersecting;}).observe(heroObject);
 setInterval(()=>{if(!playing||document.hidden||!demoVisible||Date.now()-lastInteraction<5500)return;heroObject.classList.add('pointer-approach');setTimeout(()=>{heroObject.classList.remove('pointer-approach');if(!playing||document.hidden||!demoVisible||Date.now()-lastInteraction<5500)return;countOnce();},650);},2800);
 document.querySelectorAll('[data-phrase]').forEach(b=>b.addEventListener('click',()=>{lastInteraction=Date.now();}));
@@ -71,7 +79,7 @@ document.addEventListener('click',e=>{if(!e.composedPath().includes(menu))closeM
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.classList.contains('menu-open')){closeMenu();menuToggle.focus();}});
 const navLinks=menu.querySelectorAll('.menu-links a');
 // Select one destination in document order, using layout coordinates, not reveal transforms.
-function sectionTop(element){let top=0;for(let node=element;node;node=node.offsetParent)top+=node.offsetTop;return top;}
+function sectionTop(element){return element.getBoundingClientRect().top+scrollY+(element.id==='main'?0:parseFloat(getComputedStyle(element).paddingTop)||0);}
 const navSections=[...navLinks].map(link=>({link,section:document.querySelector(link.hash)})).filter(item=>item.section);
 function updateNavLocation(){let current=navSections[0];for(const item of navSections){if(sectionTop(item.section)<=scrollY+145)current=item;}if(innerHeight+scrollY>=document.documentElement.scrollHeight-8)current=navSections.at(-1);navSections.forEach(item=>{if(scrollY>100&&item===current)item.link.setAttribute('aria-current','location');else item.link.removeAttribute('aria-current');});}
 addEventListener('scroll',updateNavLocation,{passive:true});updateNavLocation();
@@ -135,14 +143,14 @@ prayerMute.addEventListener('click',()=>{prayerDemoMuted=!prayerDemoMuted;prayer
 bookmark.addEventListener('click',()=>{verseBookmarked=!verseBookmarked;bookmark.setAttribute('aria-pressed',String(verseBookmarked));bookmark.querySelector('[data-icon]').dataset.icon=verseBookmarked?'bookmark-filled':'bookmark';paintIcons(bookmark);document.querySelector('.verse-card').classList.toggle('is-bookmarked',verseBookmarked);if(!motion.matches)spring(bookmark,[{transform:'scale(1)'},{transform:'scale(1.22) rotate(-8deg)',offset:.4},{transform:'scale(1) rotate(0deg)'}],{duration:400});renderWidgetLabels();});
 const weekSamples=[12,23,18,34,27,42,33],weekNames=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],weekArabic=['الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت','الأحد'];let selectedSample=6;
 const weekChart=document.querySelector('#week-chart');weekSamples.forEach((value,i)=>{const button=document.createElement('button');button.className='week-bar';button.style.setProperty('--bar-height',`${value/50*100}%`);button.innerHTML=`<span class="week-bar-track"><i></i></span><span class="week-bar-label"></span>`;button.addEventListener('click',()=>{selectedSample=i;renderWeek();if(!motion.matches)spring(document.querySelector('#week-count'),[{opacity:.3,transform:'translateY(9px)'},{opacity:1,transform:'translateY(0)'}],{duration:300,easing:'ease-out'});});weekChart.append(button);});
-function renderWeek(){beadSprings.get(document.querySelector('#week-ring-value'))?.cancel();const value=weekSamples[selectedSample],percent=Math.round(value/50*100);document.querySelector('#week-count').textContent=String(value);document.querySelector('#week-day').textContent=(arabic?weekArabic:weekNames)[selectedSample];document.querySelector('#week-percent').textContent=percent+'%';document.querySelector('#week-ring-value').style.strokeDashoffset=String(251.33*(1-value/50));weekChart.querySelectorAll('button').forEach((button,i)=>{button.setAttribute('aria-pressed',String(i===selectedSample));button.setAttribute('aria-label',`${(arabic?weekArabic:weekNames)[i]}: ${weekSamples[i]}`);button.querySelector('.week-bar-label').textContent=arabic?['ن','ث','ر','خ','ج','س','ح'][i]:['M','T','W','T','F','S','S'][i];});}
+function renderWeek(){weekChart.setAttribute('aria-label',arabic?'استكشف النشاط اليومي التجريبي':'Explore daily activity');beadSprings.get(document.querySelector('#week-ring-value'))?.cancel();const value=weekSamples[selectedSample],percent=Math.round(value/50*100);document.querySelector('#week-count').textContent=String(value);document.querySelector('#week-day').textContent=(arabic?weekArabic:weekNames)[selectedSample];document.querySelector('#week-percent').textContent=percent+'%';document.querySelector('#week-ring-value').style.strokeDashoffset=String(251.33*(1-value/50));weekChart.querySelectorAll('button').forEach((button,i)=>{button.setAttribute('aria-pressed',String(i===selectedSample));button.setAttribute('aria-label',`${(arabic?weekArabic:weekNames)[i]}: ${weekSamples[i]}`);button.querySelector('.week-bar-label').textContent=arabic?['ن','ث','ر','خ','ج','س','ح'][i]:['M','T','W','T','F','S','S'][i];});}
 renderWeek();renderWidgetLabels();document.querySelector('#language').addEventListener('click',()=>{renderWeek();renderWidgetLabels();});
 
 const beadCord=document.createElementNS('http://www.w3.org/2000/svg','svg');beadCord.setAttribute('viewBox','0 0 100 100');beadCord.setAttribute('class','masbaha-cord');beadCord.setAttribute('aria-hidden','true');
 const cordPath=document.createElementNS('http://www.w3.org/2000/svg','path');const start=Math.PI/2+.16,end=Math.PI/2+Math.PI*2-.16;const point=a=>`${50+Math.cos(a)*50} ${50+Math.sin(a)*50}`;cordPath.setAttribute('d',`M ${point(start)} A 50 50 0 1 1 ${point(end)}`);beadCord.append(cordPath);orbit.prepend(beadCord);
 // Motion is attached to the control that caused it, with no page-layout shifts.
 document.querySelectorAll('.answers-list details').forEach(detail=>detail.addEventListener('toggle',()=>{if(motion.matches||!detail.open)return;spring(detail.querySelector('.answer-dot'),[{transform:'scale(.8) rotate(-12deg)'},{transform:'scale(1.12) rotate(5deg)',offset:.55},{transform:'scale(1) rotate(0deg)'}],{duration:480,easing:'cubic-bezier(.2,.7,.2,1)'});spring(detail.querySelector('.answer-body'),[{opacity:.2,transform:'translateY(9px)'},{opacity:1,transform:'translateY(0)'}],{duration:360,easing:'ease-out'});}));
-document.querySelectorAll('.answers-list summary,.salah-mute,.verse-bookmark,.get-button,.menu-toggle').forEach(control=>control.addEventListener('pointerdown',event=>{if(motion.matches)return;const bounds=control.getBoundingClientRect(),ripple=document.createElement('span'),size=Math.max(bounds.width,bounds.height)*2;ripple.className='control-ripple';ripple.setAttribute('aria-hidden','true');ripple.style.cssText=`width:${size}px;height:${size}px;left:${event.clientX-bounds.left}px;top:${event.clientY-bounds.top}px`;control.append(ripple);const animation=ripple.animate([{scale:0,opacity:.8},{scale:1,opacity:0}],{duration:650,easing:'ease-out'});animation.onfinish=()=>ripple.remove();}));
+document.querySelectorAll('.answers-list summary,.salah-mute,.verse-bookmark,.get-button,.menu-toggle').forEach(control=>control.addEventListener('pointerdown',event=>{if(motion.matches)return;const bounds=control.getBoundingClientRect(),ripple=document.createElement('span'),zoom=control.currentCSSZoom||1,size=Math.max(bounds.width,bounds.height)*2/zoom;ripple.className='control-ripple';ripple.setAttribute('aria-hidden','true');ripple.style.cssText=`width:${size}px;height:${size}px;left:${(event.clientX-bounds.left)/zoom}px;top:${(event.clientY-bounds.top)/zoom}px`;control.append(ripple);const animation=ripple.animate([{scale:0,opacity:.8},{scale:1,opacity:0}],{duration:650,easing:'ease-out'});animation.onfinish=()=>ripple.remove();}));
 let clockVisible=false;
 const clockVisibility=new IntersectionObserver(entries=>{clockVisible=entries[0].isIntersecting;},{threshold:.1});clockVisibility.observe(document.querySelector('.salah-clock'));
 
@@ -241,5 +249,161 @@ function stopWheel(){if(wheelFrame)cancelAnimationFrame(wheelFrame);wheelFrame=0
 function easeWheel(now){const dt=wheelPrevious?Math.min(40,now-wheelPrevious):16;wheelPrevious=now;const current=scrollY,next=current+(wheelTarget-current)*(1-Math.exp(-dt/85));window.scrollTo({top:next,behavior:'instant'});if(Math.abs(wheelTarget-next)>.5)wheelFrame=requestAnimationFrame(easeWheel);else{window.scrollTo({top:wheelTarget,behavior:'instant'});wheelFrame=0;wheelPrevious=0;}}
 addEventListener('wheel',event=>{if(motion.matches||event.ctrlKey||Math.abs(event.deltaX)>Math.abs(event.deltaY)||event.target.closest('.menu-links,textarea,input,select,[contenteditable=true]'))return;if(!event.deltaY)return;event.preventDefault();const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?innerHeight:1);wheelTarget=Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,(wheelFrame?wheelTarget:scrollY)+delta));if(!wheelFrame)wheelFrame=requestAnimationFrame(easeWheel);},{passive:false});
 addEventListener('touchstart',stopWheel,{passive:true});addEventListener('pointerdown',stopWheel,{passive:true});addEventListener('keydown',event=>{if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(event.key))stopWheel();});motion.addEventListener('change',()=>{if(motion.matches)stopWheel();});
-// One click, one scroll. Updating the URL must not also trigger native anchor scrolling.
-document.addEventListener('click',event=>{const link=event.target.closest('a[href^="#"]');if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;const destination=document.getElementById(link.hash.slice(1));if(!destination)return;event.preventDefault();stopWheel();closeMenu();history.replaceState(null,'',link.hash);requestAnimationFrame(()=>{wheelTarget=Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,sectionTop(destination)-105));if(motion.matches)window.scrollTo({top:wheelTarget,behavior:'instant'});else{wheelPrevious=0;wheelFrame=requestAnimationFrame(easeWheel);}});});
+// Let native anchors handle focus, history and scrolling exactly once.
+document.addEventListener('click',event=>{const link=event.target.closest('a[href^="#"]');if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;stopWheel();closeMenu();});
+
+// The pointer wears a small masbaha: pearls on a cord with a swinging tassel. It unrolls around
+// controls and counts each click with a jade bead, like the demo in the hero.
+// The real cursor stays native, so this layer is decoration and can never add input lag.
+(()=>{
+  const forcedColors=matchMedia('(forced-colors: active)');
+  const enabled=()=>finePointer.matches&&!motion.matches&&!forcedColors.matches;
+  const CONTROLS='a[href],button,summary,label,[role=button]',READING='p,h1,h2,h3,blockquote,figcaption';
+  const SHAPES={idle:{radius:25,count:12,bead:3},hover:{radius:36,count:18,bead:3.2},text:{radius:12,count:12,bead:1.5}};
+  const MAX_BEADS=56,COUNTING_BEADS=12,BEAD_SPACING=15,WRAP_BEAD=2.6,CORD_GAP=11;
+  const WRAP_PADDING=10,WRAP_MAX_WIDTH=320,WRAP_MAX_HEIGHT=110;
+  const SPRITE_RADIUS=5,SPRITE_PADDING=3,SPRITE_SCALE=3,PENDANT_SCALE=.25;
+
+  let layer,canvas,ctx,pearl,jade,pendant,width=0,height=0,dpr=1;
+  const beads=Array.from({length:MAX_BEADS},()=>({x:0,y:0,vx:0,vy:0,size:0,fill:0}));
+  const anchor={x:0,y:0,vx:0,vy:0},swing={p:0,v:0},flow={x:0,y:0};
+  let mouseX=0,mouseY=0,previousX=0,previousY=0,alpha=0,pointX=0,pointY=0;
+  let target=null,hovered=null,mode='idle',pressed=false,visible=false,recheck=false,raf=0,last=0;
+  let filled=0,waveAt=-1e9,waveFrom=0;
+
+  // Pearl and jade use the same gradients as the hero's beads.
+  function beadSprite(stops,shadow){
+    const size=(SPRITE_RADIUS+SPRITE_PADDING)*2*SPRITE_SCALE,sprite=document.createElement('canvas');sprite.width=sprite.height=size;
+    const g=sprite.getContext('2d'),mid=size/2,r=SPRITE_RADIUS*SPRITE_SCALE,x=mid-r*.4,y=mid-r*.56,fill=g.createRadialGradient(x,y,0,x,y,r*2.1);
+    stops.forEach(([offset,color])=>fill.addColorStop(offset,color));
+    g.shadowColor=shadow;g.shadowBlur=2*SPRITE_SCALE;g.shadowOffsetY=.6*SPRITE_SCALE;g.fillStyle=fill;g.beginPath();g.arc(mid,mid,r,0,Math.PI*2);g.fill();
+    return sprite;
+  }
+  // The pendant is drawn from the same shapes and colours as the hero's tassel.
+  function pendantSprite(){
+    const sprite=document.createElement('canvas'),s=PENDANT_SCALE*SPRITE_SCALE;sprite.width=30*s;sprite.height=72*s;
+    const g=sprite.getContext('2d');g.setTransform(s,0,0,s,-9*s,-8*s);
+    const imam=g.createRadialGradient(22,14,0,24,22,14);imam.addColorStop(0,'#f2f3dc');imam.addColorStop(.6,'#a8c4b9');imam.addColorStop(1,'#37696d');
+    const silk=g.createLinearGradient(11,0,37,0);[[0,'#29494e'],[.38,'#a5adc9'],[.55,'#d9deed'],[1,'#29494e']].forEach(([o,c])=>silk.addColorStop(o,c));
+    const binding=g.createLinearGradient(18,0,30,0);[[0,'#37696d'],[.5,'#c2cfb4'],[1,'#37696d']].forEach(([o,c])=>binding.addColorStop(o,c));
+    g.fillStyle=silk;g.fill(new Path2D('M24 36C18 42 7 56 11 69Q24 76 37 69C41 56 30 42 24 36Z'));
+    g.fillStyle=imam;g.beginPath();g.ellipse(24,22,6,12,0,0,Math.PI*2);g.fill();
+    g.fillStyle=binding;g.beginPath();g.roundRect(18,32,12,8,2.5);g.fill();
+    return sprite;
+  }
+  function prepare(){
+    if(layer)return;
+    layer=document.createElement('div');layer.className='nq-cursor';layer.setAttribute('aria-hidden','true');
+    canvas=document.createElement('canvas');layer.append(canvas);document.body.append(layer);ctx=canvas.getContext('2d');
+    pearl=beadSprite([[0,'#fff'],[.34,'#edf1ec'],[.7,'#c1cdc9'],[1,'#8da8a4']],'#153e4366');
+    jade=beadSprite([[0,'#effac7'],[.4,'#9bd9b0'],[1,'#427a61']],'#a1e5b3a0');
+    pendant=pendantSprite();
+  }
+  function resize(){dpr=Math.min(2,devicePixelRatio||1);width=layer.clientWidth;height=layer.clientHeight;canvas.width=width*dpr;canvas.height=height*dpr;}
+
+  // Walks a rounded rectangle clockwise from its bottom centre, so the tassel always hangs at the join.
+  function perimeter(p){return 2*(p.w-2*p.r)+2*(p.h-2*p.r)+2*Math.PI*p.r;}
+  function pointOn(distance,p){
+    const hw=p.w/2-p.r,hh=p.h/2-p.r,arc=p.r*Math.PI/2,{x,y,r}=p;let d=distance;
+    const at=(px,py)=>{pointX=px;pointY=py;};
+    if(d<hw)return at(x-d,y+p.h/2);d-=hw;
+    if(d<arc)return at(x-hw-Math.sin(d/r)*r,y+hh+Math.cos(d/r)*r);d-=arc;
+    if(d<2*hh)return at(x-p.w/2,y+hh-d);d-=2*hh;
+    if(d<arc)return at(x-hw-Math.cos(d/r)*r,y-hh-Math.sin(d/r)*r);d-=arc;
+    if(d<2*hw)return at(x-hw+d,y-p.h/2);d-=2*hw;
+    if(d<arc)return at(x+hw+Math.sin(d/r)*r,y-hh-Math.cos(d/r)*r);d-=arc;
+    if(d<2*hh)return at(x+p.w/2,y-hh+d);d-=2*hh;
+    if(d<arc)return at(x+hw+Math.cos(d/r)*r,y+hh+Math.sin(d/r)*r);d-=arc;
+    return at(x+hw-d,y+p.h/2);
+  }
+  function aim(element){
+    if(element===hovered)return;hovered=element;
+    target=element?.closest?.(CONTROLS)||null;
+    mode=target?'hover':element?.closest?.(READING)?'text':'idle';
+  }
+  function currentPath(){
+    const shape=SHAPES[mode],size=shape.radius*2,round={x:mouseX,y:mouseY,w:size,h:size,r:shape.radius,count:shape.count,bead:shape.bead,mode};
+    if(!target)return round;
+    const box=target.isConnected?target.getBoundingClientRect():null;
+    if(!box||!box.width||box.width>WRAP_MAX_WIDTH||box.height>WRAP_MAX_HEIGHT)return round;
+    // Unroll around the control and lean slightly toward the pointer so it still feels attached.
+    const centerX=box.left+box.width/2,centerY=box.top+box.height/2,w=box.width+WRAP_PADDING*2,h=box.height+WRAP_PADDING*2;
+    const radius=getComputedStyle(target).borderTopLeftRadius,own=radius.endsWith('%')?h/2:parseFloat(radius)*(target.currentCSSZoom||1);
+    const wrap={x:centerX+(mouseX-centerX)*.08,y:centerY+(mouseY-centerY)*.08,w,h,r:Math.min(Math.max(own+WRAP_PADDING,12),Math.min(w,h)/2),bead:WRAP_BEAD,mode:'wrap'};
+    wrap.count=Math.min(MAX_BEADS,Math.max(10,Math.round(perimeter(wrap)/BEAD_SPACING)));
+    return wrap;
+  }
+  function draw(visibleBeads,now){
+    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);
+    if(alpha<.01)return;
+    ctx.globalAlpha=alpha;
+    ctx.beginPath();ctx.moveTo(anchor.x,anchor.y);
+    for(let i=0;i<visibleBeads;i++){const bead=beads[i],next=beads[Math.min(i+1,visibleBeads-1)];ctx.quadraticCurveTo(bead.x,bead.y,(bead.x+next.x)/2,(bead.y+next.y)/2);}
+    ctx.lineTo(anchor.x,anchor.y);
+    ctx.strokeStyle='#102e3459';ctx.lineWidth=2;ctx.stroke();ctx.strokeStyle='#d4e2d2cc';ctx.lineWidth=.9;ctx.stroke();
+    ctx.save();ctx.translate(anchor.x,anchor.y);ctx.rotate(swing.p);
+    ctx.drawImage(pendant,-15*PENDANT_SCALE,-2*PENDANT_SCALE,30*PENDANT_SCALE,72*PENDANT_SCALE);ctx.restore();
+    const spriteRatio=(SPRITE_RADIUS+SPRITE_PADDING)/SPRITE_RADIUS,since=now-waveAt;
+    for(let i=0;i<visibleBeads;i++){
+      const bead=beads[i],wave=(since-Math.abs(i-waveFrom)*22)/420,pulse=wave>0&&wave<1?Math.sin(wave*Math.PI)**2*.6:0,half=bead.size*(1+pulse)*spriteRatio;
+      if(half<=.05)continue;
+      ctx.globalAlpha=alpha;ctx.drawImage(pearl,bead.x-half,bead.y-half,half*2,half*2);
+      if(bead.fill>.01){ctx.globalAlpha=alpha*bead.fill;ctx.drawImage(jade,bead.x-half,bead.y-half,half*2,half*2);}
+    }
+    ctx.globalAlpha=1;
+  }
+  function frame(now){
+    raf=0;if(!visible)return;
+    const dt=last?Math.max(.004,Math.min(.034,(now-last)/1000)):.016;last=now;
+    if(recheck){recheck=false;hovered=null;aim(document.elementFromPoint(mouseX,mouseY));}
+    const path=currentPath(),press=pressed?(path.mode==='wrap'?.975:.86):1;
+    path.w*=press;path.h*=press;path.r*=press;
+
+    const rawX=(mouseX-previousX)/dt,rawY=(mouseY-previousY)/dt,moved=rawX!==0||rawY!==0;previousX=mouseX;previousY=mouseY;
+    const smooth=1-Math.exp(-dt*18);flow.x+=(rawX-flow.x)*smooth;flow.y+=(rawY-flow.y)*smooth;
+    const flowSpeed=Math.hypot(flow.x,flow.y),length=perimeter(path),span=Math.max(0,length-CORD_GAP*2);
+    const sizeEase=1-Math.exp(-dt*18),fillEase=1-Math.exp(-dt*12);
+    let settled=!moved&&flowSpeed<.5,visibleBeads=0;
+    beads.forEach((bead,i)=>{
+      const active=i<path.count;pointOn(CORD_GAP+span*(active?i/(path.count-1):1),path);
+      // Beads on the leading side respond faster, so the ring stretches into a strand as it travels.
+      const offsetX=pointX-path.x,offsetY=pointY-path.y,reach=Math.hypot(offsetX,offsetY)||1;
+      const lead=flowSpeed>40?(offsetX*flow.x+offsetY*flow.y)/(reach*flowSpeed)*Math.min(1,flowSpeed/900):0,stiffness=560+lead*170;
+      bead.vx+=(stiffness*(pointX-bead.x)-38*bead.vx)*dt;bead.vy+=(stiffness*(pointY-bead.y)-38*bead.vy)*dt;bead.x+=bead.vx*dt;bead.y+=bead.vy*dt;
+      const size=active?path.bead:0,fill=i<filled?1:0;bead.size+=(size-bead.size)*sizeEase;bead.fill+=(fill-bead.fill)*fillEase;
+      if(bead.size>.2)visibleBeads=i+1;
+      if(Math.abs(bead.vx)+Math.abs(bead.vy)>.6||Math.abs(pointX-bead.x)+Math.abs(pointY-bead.y)>.2||Math.abs(size-bead.size)>.02||Math.abs(fill-bead.fill)>.01)settled=false;
+    });
+    const anchorGoalY=path.y+path.h/2,oldVX=anchor.vx;
+    anchor.vx+=(560*(path.x-anchor.x)-38*anchor.vx)*dt;anchor.vy+=(560*(anchorGoalY-anchor.y)-38*anchor.vy)*dt;anchor.x+=anchor.vx*dt;anchor.y+=anchor.vy*dt;
+    swing.v+=(-90*swing.p-5*swing.v-(anchor.vx-oldVX)/dt*.0042)*dt;swing.p=Math.max(-1,Math.min(1,swing.p+swing.v*dt));
+    const wantedAlpha=path.mode==='text'?0:path.mode==='idle'?.9:1;alpha+=(wantedAlpha-alpha)*(1-Math.exp(-dt*16));
+    draw(visibleBeads,now);
+    const waving=now-waveAt<420+path.count*22;
+    if(!settled||waving||Math.abs(swing.p)+Math.abs(swing.v)>.015||Math.abs(anchor.vx)+Math.abs(anchor.vy)>.6||Math.abs(wantedAlpha-alpha)>.01)raf=requestAnimationFrame(frame);else last=0;
+  }
+  function wake(){if(!raf&&visible)raf=requestAnimationFrame(frame);}
+  function hide(){visible=false;pressed=false;layer?.classList.remove('is-visible');if(raf)cancelAnimationFrame(raf);raf=0;last=0;}
+  function show(x,y){
+    prepare();resize();visible=true;layer.classList.add('is-visible');previousX=x;previousY=y;alpha=0;flow.x=flow.y=0;
+    beads.forEach(bead=>{bead.x=x;bead.y=y;bead.vx=bead.vy=0;bead.size=0;});
+    anchor.x=x;anchor.y=y;anchor.vx=anchor.vy=0;swing.p=swing.v=0;
+  }
+  document.addEventListener('pointermove',event=>{
+    if(event.pointerType==='touch'||!enabled())return;
+    mouseX=event.clientX;mouseY=event.clientY;if(!visible)show(mouseX,mouseY);
+    aim(event.target);wake();
+  },{passive:true});
+  document.addEventListener('pointerdown',event=>{
+    if(event.pointerType==='touch'){hide();return;}
+    if(!visible||event.button!==0)return;
+    pressed=true;filled=filled>=COUNTING_BEADS?1:filled+1;waveFrom=filled-1;waveAt=performance.now();wake();
+  },{passive:true});
+  const release=()=>{if(pressed){pressed=false;wake();}};
+  document.addEventListener('pointerup',release,{passive:true});document.addEventListener('pointercancel',release,{passive:true});
+  document.documentElement.addEventListener('pointerleave',hide);
+  // Scrolling slides new content under a still mouse, so look again at what is beneath it.
+  addEventListener('scroll',()=>{if(visible){recheck=true;wake();}},{passive:true});
+  addEventListener('resize',()=>{if(visible){resize();wake();}},{passive:true});
+  [motion,finePointer,forcedColors].forEach(query=>query.addEventListener('change',()=>{if(!enabled())hide();}));
+})();

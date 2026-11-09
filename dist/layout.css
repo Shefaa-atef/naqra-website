@@ -1,0 +1,109 @@
+/* Page rhythm and desktop scale. Loaded last so it settles the earlier layers. */
+:root{--nav-offset:96px}
+@media(max-width:700px){:root{--nav-offset:86px}}
+
+/* The opening section owns the whole first screen. */
+.hero{min-height:calc(100svh - var(--nav-offset));align-content:center}
+
+/* One gap on each side of the download panel, matching every other section. */
+.answers-section{padding-bottom:0}
+.get-section{padding-top:var(--section-space)}
+.bold-footer{margin-top:var(--section-space)}
+#download{scroll-margin-top:calc(0px - var(--section-space))}
+
+/* Paint scene gradients under the 1px border so they cannot tile back along the edge. */
+.experience-grid .story-visual{background-origin:border-box}
+
+/* A coloured page scrollbar for mouse users; touch screens keep their overlay bar. */
+@media(hover:hover) and (pointer:fine){
+ html::-webkit-scrollbar{width:14px}
+ html::-webkit-scrollbar-track{background:#0d282e}
+ html::-webkit-scrollbar-thumb{min-height:72px;border:3px solid #0d282e;border-radius:99px;background:linear-gradient(180deg,#89cbb0,#eacb88 55%,#a7b6e0)}
+ html::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#a5e4c9,#f6dc9f 55%,#c0cdf0)}
+ @supports not selector(::-webkit-scrollbar){html{scrollbar-color:#89cbb0 #0d282e}}
+}
+
+/* Readex Pro carries more colour than Latin text at the same weight, so Arabic sits lighter. */
+[dir=rtl] h2,[dir=rtl] h3,[dir=rtl] .get-copy h2{font-weight:400}
+[dir=rtl] .hero .lede,[dir=rtl] .experience-grid .story-copy p,[dir=rtl] .quote-layout>div>p:last-child,[dir=rtl] .intention>div>p:not(.eyebrow){font-weight:300}
+
+/* Desktop hierarchy. Big moments: the headline and masbaha, the verse, the closing wordmark.
+   Everything else stays at a calm reading size. */
+@media(min-width:1181px){
+ :root{--page:min(1480px,calc(100% - clamp(120px,14vw,360px)));--nav-offset:88px;--ring:600px;--section-space:clamp(104px,7.5vw,144px)}
+ html{scroll-padding-top:100px}
+ body{padding-top:var(--nav-offset)}
+ .wrap{width:var(--page)}
+
+ .nav.wrap{width:min(820px,calc(100% - 96px));height:60px;gap:24px;padding:8px 10px 8px 18px;border-radius:16px}
+ [dir=rtl] .nav.wrap{padding:8px 18px 8px 10px}
+ .nav .brand{font-size:20px;gap:9px}
+ .nav .brand img{width:30px;height:30px;border-radius:9px}
+ .nav .menu-links{gap:22px}
+ .nav .menu-links a,[dir=rtl] .nav .menu-links a,.nav .language{font-size:13px}
+ .nav .nav-actions{gap:14px}
+ .nav .nav-download,[dir=rtl] .nav .nav-download{height:42px;padding-inline:15px;font-size:13px;border-radius:11px}
+
+ .hero{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(40px,4vw,80px);padding-block:0 24px}
+ .hero h1{font-size:clamp(58px,5vw,94px)}
+ [dir=rtl] .hero h1{font-size:clamp(52px,4.5vw,84px);font-weight:400}
+ .hero .lede,[dir=rtl] .hero .lede{font-size:18px;max-width:30em;margin-top:28px;margin-bottom:38px}
+ .hero .button{min-height:58px;padding-inline:26px;font-size:15px}
+ .hero-object{width:min(100%,var(--ring),calc(100svh - var(--nav-offset) - 160px));margin-bottom:84px;container-type:inline-size}
+ .hero .bead{width:4cqw;height:4cqw}
+ .hero .count-number{font-size:21cqw}
+ .hero .demo-phrase{font-size:7.2cqw}
+ .hero .count-plus{font-size:4.6cqw}
+ .hero .tassel{width:17cqw;height:15.6cqw}
+ .hero .demo-pointer{width:6.4cqw}
+ .hero .phrase-switch{top:calc(100% + 30px)}
+ .hero .phrase-switch button{font-size:19px}
+
+ h2,.answers-heading h2,[dir=rtl] .answers-heading h2{font-size:clamp(38px,3.1vw,56px)}
+ .eyebrow,[dir=rtl] .eyebrow{font-size:11px}
+ .experience{padding-top:var(--section-space)}
+ #experience,#daily-wird,#questions,#download{scroll-margin-top:calc(0px - var(--section-space))}
+ .section-intro{margin-bottom:44px}
+ .experience-grid{gap:30px}
+ .experience-grid .story-copy{padding:26px 20px 18px}
+ .experience-grid .story-copy h3,[dir=rtl] .experience-grid .story-copy h3{font-size:26px}
+ .experience-grid .story-copy p,[dir=rtl] .experience-grid .story-copy p{font-size:15px}
+
+ .quote-layout,.intention{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(56px,6vw,112px)}
+ .quote-layout>div>p:last-child,[dir=rtl] .quote-layout>div>p:last-child,.intention>div>p:not(.eyebrow),[dir=rtl] .intention>div>p:not(.eyebrow){font-size:16px;max-width:30em}
+ .verse-card{min-height:380px;padding:32px 36px 26px}
+ .verse-card blockquote{font-size:clamp(38px,3.3vw,60px);min-height:220px}
+ .verse-card[data-category=hadith] blockquote{font-size:clamp(28px,2.3vw,42px)}
+ .verse-card figcaption{font-size:12px}
+ .verse-tag{font-size:12px}
+
+ .week-widget{padding:30px}
+ .week-count strong{font-size:62px}
+ .week-day,.week-subtitle{font-size:12px}
+ .week-ring{width:104px;height:104px}
+ .week-chart{height:140px;gap:14px}
+ .week-bar-track{height:112px;max-width:30px}
+
+ .answers-section{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(56px,6vw,112px)}
+ .answers-list summary,[dir=rtl] .answers-list summary{font-size:16px}
+ .answer-body{padding:0 32px 26px 75px}
+ [dir=rtl] .answer-body{padding:0 75px 26px 32px}
+ .answer-body p,[dir=rtl] .answer-body p{font-size:15px;max-width:38em}
+
+ .get-panel{padding:44px 48px}
+ .get-copy{grid-template-columns:68px minmax(0,1fr)}
+ .get-copy>img{width:68px;height:68px}
+ .get-copy h2,[dir=rtl] .get-copy h2{font-size:clamp(32px,2.6vw,44px)}
+ .get-copy>p,[dir=rtl] .get-copy>p{font-size:15px;max-width:30em}
+ .get-action{min-width:240px}
+ .get-button,[dir=rtl] .get-button{min-height:58px;font-size:15px}
+ .get-version{font-size:11px}
+
+ .footer-brand{grid-template-columns:72px max-content max-content;gap:28px}
+ .footer-brand>img{width:72px;height:72px}
+ .footer-name{font-size:clamp(120px,12vw,216px)}
+ .footer-ar{font-size:clamp(56px,5.2vw,100px)}
+ .footer-colophon,[dir=rtl] .footer-colophon{font-size:12px}
+}
+@media(min-width:1700px){.experience-grid .story-visual{zoom:1.12}}
+@media(min-width:2300px){:root{--page:1720px;--ring:700px}.hero h1{font-size:110px}[dir=rtl] .hero h1{font-size:98px}}
