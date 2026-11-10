@@ -60,7 +60,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .shortcut-trigger:hover kbd{transform:translateY(-2px);rotate:0deg}
 .prayer-story{--signal:#247c78}
 .prayer-story[data-proximity=hour]{--signal:#d9b84f}
-.prayer-story[data-proximity=soon]{--signal:#df8b38}
+.prayer-story[data-proximity=soon]{--signal:#ff7800}
 .prayer-story[data-proximity=near]{--signal:#d65b50}
 .prayer-proximity-star{position:absolute;top:23px;left:25px;width:55px;height:55px;z-index:2;filter:drop-shadow(0 6px 10px #142c3530)}
 .prayer-proximity-star>svg{width:100%;height:100%;overflow:visible}
@@ -272,3 +272,5 @@ html{scroll-behavior:smooth;scroll-padding-top:105px}
 @media(max-width:700px){#experience{scroll-margin-top:-35px}#download{scroll-margin-top:-66px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 .footer-colophon>span{direction:ltr;unicode-bidi:isolate}
+
+.get-install-note{display:block;max-width:300px;font-size:11px;line-height:1.8;color:#b4c9c1;text-align:center;margin-top:10px}

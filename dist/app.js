@@ -22,7 +22,7 @@ function prayerPreviewFrame(now){
  demoLast=now;
  if(document.hidden||!prayerPreviewVisible){requestAnimationFrame(prayerPreviewFrame);return;}
  const arrived=demoElapsed>=countdownSeconds,remaining=arrived?0:3600*(1-demoElapsed/countdownSeconds),seconds=Math.ceil(remaining);
- const proximity=arrived?'later':remaining<=600?'near':remaining<=1800?'soon':'hour';
+ const proximity=arrived?'later':remaining<=600?'near':remaining<=2340?'soon':'hour';
  const phaseChanged=prayerScene.dataset.proximity!==proximity;
  prayerScene.dataset.proximity=proximity;
  const progress=1-remaining/3600;
@@ -68,8 +68,8 @@ const revealTargets=document.querySelectorAll('.section-intro,.experience-grid a
 if('IntersectionObserver' in window){const reveals=new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting){e.target.classList.add('in-view');reveals.unobserve(e.target);}},{threshold:.12});revealTargets.forEach((el,i)=>{el.classList.add('reveal');el.style.setProperty('--reveal-delay',`${i%2*100}ms`);reveals.observe(el);});}
 let scrollPending=false;function updateScroll(){const max=document.documentElement.scrollHeight-innerHeight;document.querySelector('.scroll-track i').style.transform=`scaleX(${max>0?scrollY/max:0})`;document.body.classList.toggle('scrolled',scrollY>40);scrollPending=false;}addEventListener('scroll',()=>{if(!scrollPending){requestAnimationFrame(updateScroll);scrollPending=true;}},{passive:true});updateScroll();
 
-// The same strand returns as a loader, a desktop orbit and a footer thread.
-document.querySelectorAll('[data-bead-loop]').forEach(loop=>{const n=Number(loop.dataset.beadLoop);for(let i=0;i<n;i++){const bead=document.createElement('i');bead.className='strand-bead';const angle=-Math.PI/2+i/n*Math.PI*2;bead.style.setProperty('--bx',`${Math.cos(angle)*48}%`);bead.style.setProperty('--by',`${Math.sin(angle)*48}%`);bead.style.setProperty('--delay',`${i*.09}s`);loop.append(bead);}});
+// Prayer beads share one material across the page.
+document.querySelectorAll('[data-bead-loop]').forEach(loop=>{const n=Number(loop.dataset.beadLoop);for(let i=0;i<n;i++){const bead=document.createElement('i');bead.className='strand-bead';const angle=-Math.PI/2+i/n*Math.PI*2;bead.style.setProperty('--bx',`${Math.cos(angle)*48}%`);bead.style.setProperty('--by',`${Math.sin(angle)*48}%`);bead.style.setProperty('--delay',`${-2.7+i/n*2.7}s`);loop.append(bead);}});
 document.querySelectorAll('[data-bead-line]').forEach(line=>{for(let i=0;i<Number(line.dataset.beadLine);i++){const bead=document.createElement('i');bead.style.setProperty('--delay',`${i*.18}s`);line.append(bead);}});
 const menu=document.querySelector('#site-menu'),menuToggle=document.querySelector('#menu-toggle');
 function closeMenu(){menu.classList.remove('menu-open');menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label',arabic?'فتح القائمة':'Open menu');menuToggle.querySelector('[data-icon]').dataset.icon='menu';paintIcons(menuToggle);}
@@ -86,7 +86,7 @@ addEventListener('scroll',updateNavLocation,{passive:true});updateNavLocation();
 document.querySelector('#language').addEventListener('click',closeMenu);
 document.querySelector('#year').textContent=String(new Date().getFullYear());
 const loadingStarted=performance.now();const loaded=new Promise(resolve=>{if(document.readyState==='complete')resolve();else addEventListener('load',resolve,{once:true});});
-Promise.race([Promise.all([loaded,document.fonts.ready]),new Promise(resolve=>setTimeout(resolve,1800))]).then(()=>{setTimeout(()=>document.documentElement.classList.remove('is-loading'),motion.matches?0:Math.max(0,450-(performance.now()-loadingStarted)));});
+Promise.race([Promise.all([loaded,document.fonts.ready]),new Promise(resolve=>setTimeout(resolve,1800))]).then(()=>{setTimeout(()=>document.documentElement.classList.remove('is-loading'),motion.matches?0:Math.max(0,950-(performance.now()-loadingStarted)));});
 
 // Tactile motion follows the count: a spring at the centre, then a wave on the strand.
 const beadSprings=new WeakMap();
