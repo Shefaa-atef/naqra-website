@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#102c32">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="How Naqra handles your data: everything stays on your computer, and the internet is used only to set your prayer location.">
+  <title>Naqra — Privacy policy</title>
+  <link rel="icon" href="assets/naqra-brand.ico">
+  <style>
+    @font-face{font-family:Manrope;font-weight:200 800;src:url('assets/Manrope.ttf') format('truetype');font-display:swap}
+    @font-face{font-family:Readex;font-weight:100 900;src:url('assets/ReadexPro.ttf') format('truetype');font-display:swap}
+    :root{--ink:#e9f4ed;--muted:#a4bdb7;--paper:#102c32;--card:#ffffff0d;--teal:#87dbbd;--line:#c6e7d226}
+    @media (prefers-color-scheme: light){
+      :root:not([data-theme="dark"]){--ink:#153e43;--muted:#567176;--paper:#edf3f1;--card:#ffffffb0;--teal:#2f6b67;--line:#153e4324}
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.75 Manrope,sans-serif}
+    html[lang="ar"] body{font-family:Readex,Manrope,sans-serif;line-height:1.9}
+    a{color:var(--teal);text-underline-offset:3px}
+    a.nw{white-space:nowrap}
+    .wrap{max-width:760px;margin:0 auto;padding:0 20px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 0}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:700;font-size:18px}
+    .brand img{border-radius:10px}
+    .brand .ar{font-family:Readex,sans-serif;font-weight:400;color:var(--muted);margin-inline-start:6px}
+    button.language{font:inherit;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 16px;cursor:pointer}
+    button.language:hover{border-color:var(--teal)}
+    main{padding:24px 0 64px}
+    h1{font-size:clamp(32px,6vw,46px);line-height:1.15;margin:16px 0 6px;letter-spacing:-.01em}
+    .date{color:var(--muted);margin:0 0 28px;font-size:14px}
+    .summary{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 22px;margin:0 0 36px}
+    .summary p{margin:0}
+    h2{font-size:21px;line-height:1.35;margin:40px 0 10px}
+    ul{padding-inline-start:22px}
+    li{margin:8px 0}
+    .muted{color:var(--muted)}
+    footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--muted);font-size:14px}
+    html[lang="en"] [lang="ar"].copy, html[lang="ar"] [lang="en"].copy{display:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="./"><img src="assets/naqra.png" width="36" height="36" alt=""><span>Naqra<span class="ar" lang="ar">نقرة</span></span></a>
+      <button class="language" id="language" type="button" lang="ar">العربية</button>
+    </header>
+
+    <main class="copy" lang="en">
+      <h1>Privacy policy</h1>
+      <p class="date">Last updated: 11 November 2026</p>
+      <div class="summary">
+        <p><strong>In short:</strong> Naqra keeps everything on your computer. There is no account, no advertising, no analytics and no tracking. Naqra uses the internet only when you set your prayer location.</p>
+      </div>
+
+      <p>This policy covers the Naqra app for Windows, including the version from the Microsoft Store, and this website. Naqra is free and is made by Shefaa Atef.</p>
+
+      <h2>What stays on your computer</h2>
+      <p>Naqra saves the following in a database on your own computer:</p>
+      <ul>
+        <li>Your dhikr counts, daily wird progress and history</li>
+        <li>Your reminder schedules and settings, such as language, keyboard shortcut and appearance</li>
+        <li>Your prayer location (city name, coordinates and time zone) and calculation settings</li>
+        <li>The location of an athan audio file, if you choose your own</li>
+      </ul>
+      <p>None of this is uploaded or shared. The developer cannot see it.</p>
+
+      <h2>When Naqra uses the internet</h2>
+      <p>Only while you set your prayer location. Prayer times, reminders, the prayer star and the athan all work offline.</p>
+      <ul>
+        <li><strong>Detect my location:</strong> Naqra asks Windows for your location, and Windows asks your permission first. Naqra sends those coordinates to <a href="https://open-meteo.com/" rel="noopener" class="nw">Open-Meteo</a> to find your time zone.</li>
+        <li><strong>If Windows location is unavailable:</strong> Naqra asks <a href="https://ipwhois.io/" rel="noopener" class="nw">ipwho.is</a> for an approximate location based on your internet (IP) address.</li>
+        <li><strong>Searching for a city:</strong> the name you type is sent to Open-Meteo to find matching cities.</li>
+      </ul>
+      <p>Like any website or online service, these services see your IP address when Naqra contacts them. Naqra sends them nothing else about you. Their own privacy policies apply: <a href="https://open-meteo.com/en/terms" rel="noopener" class="nw">Open-Meteo</a>, <a href="https://ipwhois.io/privacy" rel="noopener" class="nw">ipwhois</a>.</p>
+      <p>You can turn off location access for Naqra at any time in Windows Settings &gt; Privacy &amp; security &gt; Location.</p>
+
+      <h2>Your control over your data</h2>
+      <ul>
+        <li><strong>Export:</strong> Settings &gt; Your data &gt; Export data saves a copy of your data as a file on your computer.</li>
+        <li><strong>Delete:</strong> Settings &gt; Your data &gt; Delete all data permanently removes your counts and preferences. Use it before uninstalling if you want nothing left behind.</li>
+      </ul>
+
+      <h2>Children</h2>
+      <p>Naqra does not collect personal information from anyone, including children.</p>
+
+      <h2>This website</h2>
+      <p>This website uses no cookies, analytics or trackers, and its fonts are served from the site itself. It is hosted on GitHub Pages, which may log visitors' IP addresses for security, as described in <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub's privacy statement</a>.</p>
+
+      <h2>Changes to this policy</h2>
+      <p>If Naqra starts handling data differently, this page will be updated before that version is released, and the date at the top will change.</p>
+
+      <h2>Contact</h2>
+      <p>Questions about privacy? Open an issue at <a href="https://github.com/Shefaa-atef/naqra-website/issues" rel="noopener">github.com/Shefaa-atef/naqra-website/issues</a>.</p>
+    </main>
+
+    <main class="copy" lang="ar" dir="rtl">
+      <h1>سياسة الخصوصية</h1>
+      <p class="date">آخر تحديث: ١١ نوفمبر ٢٠٢٦</p>
+      <div class="summary">
+        <p><strong>باختصار:</strong> تبقى كل بياناتك في نقرة على جهازك. لا حساب، ولا إعلانات، ولا تحليلات، ولا تتبّع. ولا تستخدم نقرة الإنترنت إلا عند تحديد موقعك لمواقيت الصلاة.</p>
+      </div>
+
+      <p>تشمل هذه السياسة تطبيق نقرة لنظام ويندوز، بما في ذلك النسخة المتوفرة في متجر مايكروسوفت، وهذا الموقع. نقرة تطبيق مجاني من تطوير شفاء عاطف.</p>
+
+      <h2>ما يبقى على جهازك</h2>
+      <p>تحفظ نقرة ما يلي في قاعدة بيانات على جهازك:</p>
+      <ul>
+        <li>عدد أذكارك، وتقدّمك في الورد اليومي، وسجلّك</li>
+        <li>مواعيد التذكيرات والإعدادات، مثل اللغة واختصار لوحة المفاتيح والمظهر</li>
+        <li>موقعك لمواقيت الصلاة (اسم المدينة والإحداثيات والمنطقة الزمنية) وإعدادات الحساب</li>
+        <li>مكان ملف الأذان الصوتي، إذا اخترت ملفك الخاص</li>
+      </ul>
+      <p>لا يُرفع أي من ذلك ولا يُشارك مع أحد، ولا يستطيع المطوّر الاطلاع عليه.</p>
+
+      <h2>متى تستخدم نقرة الإنترنت</h2>
+      <p>فقط أثناء تحديد موقعك لمواقيت الصلاة. أما مواقيت الصلاة والتذكيرات ونجمة الصلاة والأذان فكلها تعمل دون إنترنت.</p>
+      <ul>
+        <li><strong>تحديد موقعي تلقائيًا:</strong> تطلب نقرة موقعك من ويندوز، ويطلب ويندوز إذنك أولًا. ثم ترسل نقرة هذه الإحداثيات إلى <a href="https://open-meteo.com/" rel="noopener" class="nw">Open-Meteo</a> لمعرفة منطقتك الزمنية.</li>
+        <li><strong>إذا تعذّر موقع ويندوز:</strong> تطلب نقرة من <a href="https://ipwhois.io/" rel="noopener" class="nw">ipwho.is</a> موقعًا تقريبيًا بناءً على عنوان الإنترنت (IP) الخاص بك.</li>
+        <li><strong>البحث عن مدينة:</strong> يُرسل الاسم الذي تكتبه إلى Open-Meteo للعثور على المدن المطابقة.</li>
+      </ul>
+      <p>كما هو الحال مع أي موقع أو خدمة على الإنترنت، ترى هذه الخدمات عنوان IP الخاص بك عندما تتصل بها نقرة، ولا ترسل لها نقرة أي معلومات أخرى عنك. وتسري عليها سياسات الخصوصية الخاصة بها: <a href="https://open-meteo.com/en/terms" rel="noopener" class="nw">Open-Meteo</a>، <a href="https://ipwhois.io/privacy" rel="noopener" class="nw">ipwhois</a>.</p>
+      <p>يمكنك إيقاف وصول نقرة إلى موقعك في أي وقت من إعدادات ويندوز &gt; الخصوصية والأمان &gt; الموقع.</p>
+
+      <h2>تحكّمك في بياناتك</h2>
+      <ul>
+        <li><strong>التصدير:</strong> من الإعدادات &gt; بياناتك &gt; تصدير البيانات، تُحفظ نسخة من بياناتك في ملف على جهازك.</li>
+        <li><strong>الحذف:</strong> من الإعدادات &gt; بياناتك &gt; حذف جميع البيانات، تُحذف أعدادك وتفضيلاتك نهائيًا. استخدمه قبل إلغاء التثبيت إن أردت ألا يبقى شيء.</li>
+      </ul>
+
+      <h2>الأطفال</h2>
+      <p>لا تجمع نقرة معلومات شخصية من أي أحد، بمن فيهم الأطفال.</p>
+
+      <h2>هذا الموقع</h2>
+      <p>لا يستخدم هذا الموقع ملفات تعريف الارتباط (الكوكيز) ولا أدوات تحليل أو تتبّع، وخطوطه محمّلة من الموقع نفسه. وهو مستضاف على GitHub Pages، الذي قد يسجّل عناوين IP للزوار لأغراض أمنية كما توضّح <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">سياسة الخصوصية لدى GitHub</a>.</p>
+
+      <h2>التغييرات على هذه السياسة</h2>
+      <p>إذا تغيّرت طريقة تعامل نقرة مع البيانات، فستُحدَّث هذه الصفحة قبل إصدار تلك النسخة، ويتغيّر التاريخ في أعلاها.</p>
+
+      <h2>التواصل</h2>
+      <p>لأي سؤال عن الخصوصية، افتح طلبًا على <a href="https://github.com/Shefaa-atef/naqra-website/issues" rel="noopener" dir="ltr">github.com/Shefaa-atef/naqra-website/issues</a>.</p>
+    </main>
+
+    <footer>© 2026 Naqra · <a href="./">Home</a></footer>
+  </div>
+  <script>
+    (function () {
+      var root = document.documentElement, button = document.getElementById('language');
+      function set(lang) {
+        var ar = lang === 'ar';
+        root.lang = ar ? 'ar' : 'en';
+        root.dir = ar ? 'rtl' : 'ltr';
+        button.textContent = ar ? 'English' : 'العربية';
+        button.lang = ar ? 'en' : 'ar';
+        document.title = ar ? 'نقرة — سياسة الخصوصية' : 'Naqra — Privacy policy';
+      }
+      var params = new URLSearchParams(location.search);
+      set(params.get('lang') === 'ar' || (!params.get('lang') && /^ar/i.test(navigator.language)) ? 'ar' : 'en');
+      button.addEventListener('click', function () {
+        var next = root.lang === 'ar' ? 'en' : 'ar';
+        set(next);
+        history.replaceState(null, '', '?lang=' + next);
+      });
+    })();
+  </script>
+</body>
+</html>

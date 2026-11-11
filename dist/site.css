@@ -500,6 +500,7 @@ html{scroll-behavior:smooth;scroll-padding-top:105px}
 .footer-colophon>span{direction:ltr;unicode-bidi:isolate}
 
 .get-install-note{display:block;max-width:300px;font-size:11px;line-height:1.8;color:#b4c9c1;text-align:center;margin-top:10px}
+.footer-privacy{margin-inline-start:auto;color:#bccdb9;font-size:13px;letter-spacing:-.015em}.footer-privacy:hover{color:var(--gold)}
 
 /* Source: layout.css */
 /* Page rhythm and desktop scale. Loaded last so it settles the earlier layers. */
